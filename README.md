@@ -217,7 +217,8 @@ POST /register
 
 ```text
 POST /task/create
-GET /task/list
+GET /task?page=1&limit=10
+GET /task?id=1page=1&limit=10
 GET /health
 ```
 
