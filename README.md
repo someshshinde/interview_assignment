@@ -149,7 +149,7 @@ Manager -> Verify -> Close Task
 ## 1. Clone Project
 
 ```bash
-git clone <repository-url>
+git clone git@github.com:someshshinde/interview_assignment.git
 cd asset-maintenance
 ```
 
