@@ -318,10 +318,10 @@ This architecture follows enterprise backend best practices:
 # Author
 
 Somesh Shinde
-##
+#
 LinkedIn: https://www.linkedin.com/in/someshshinde1/
-##
+#
 Email: [shindesomesh@gmail.com](mailto:shindesomesh@gmail.com)
-##
+#
 Mobile: +91-9822214778
 
