@@ -1,6 +1,6 @@
 # Asset Maintenance System
 
-A production-ready REST API for managing factory machinery maintenance workflows with role-based access control using Node.js, Express.js, TypeScript, Sequelize, and PostgreSQL.
+A production-ready REST API for managing factory machinery maintenance workflows with role-based access control using Node.js, Express.js, TypeScript, Sequelize, and MYSQL.
 
 ---
 
