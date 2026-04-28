@@ -1,0 +1,29 @@
+2026-04-28T05:40:54.959Z [ERROR]: error Cannot destructure property 'name' of 'req.body' as it is undefined.
+2026-04-28T05:42:18.190Z [INFO]: req.body
+2026-04-28T05:42:18.203Z [ERROR]: error Cannot destructure property 'name' of 'req.body' as it is undefined.
+2026-04-28T05:42:56.062Z [INFO]: req.body
+2026-04-28T05:42:56.078Z [ERROR]: error Cannot destructure property 'name' of 'req.body' as it is undefined.
+2026-04-28T05:44:07.662Z [INFO]: req.body
+2026-04-28T05:44:08.512Z [ERROR]: error Field 'id' doesn't have a default value
+2026-04-28T05:46:19.924Z [INFO]: req.body
+2026-04-28T05:47:05.305Z [INFO]: req.body
+2026-04-28T05:47:26.422Z [INFO]: req.body
+2026-04-28T05:48:03.329Z [INFO]: req.body
+2026-04-28T05:52:48.012Z [ERROR]: error secretOrPrivateKey must have a value
+2026-04-28T06:46:27.792Z [ERROR]: Task list fetch failed You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'ILIKE '%LOW%' OR `tasks`.`title` ILIKE '%LOW%' OR `tasks`.`description` ILIKE '%' at line 1
+2026-04-28T06:46:53.555Z [ERROR]: Task list fetch failed You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'ILIKE '%task%' OR `tasks`.`title` ILIKE '%task%' OR `tasks`.`description` ILIKE ' at line 1
+2026-04-28T07:43:53.310Z [INFO]: Test log message
+2026-04-28T07:47:10.749Z [INFO]: Test log message
+2026-04-28T07:48:01.367Z [INFO]: Test log message
+2026-04-28T07:51:21.997Z [INFO]: Test log message
+2026-04-28T07:53:24.537Z [INFO]: Test log message
+2026-04-28T07:54:53.497Z [INFO]: Test log message
+2026-04-28T07:56:11.819Z [INFO]: Test log message
+2026-04-28T07:56:43.902Z [INFO]: Test log message
+2026-04-28T08:01:28.690Z [INFO]: Test log message
+2026-04-28T08:02:26.646Z [INFO]: Test log message
+2026-04-28T08:06:51.340Z [INFO]: Test log message
+2026-04-28T08:07:32.650Z [INFO]: Test log message
+2026-04-28T08:08:56.023Z [INFO]: Test log message
+2026-04-28T08:14:30.210Z [INFO]: Test log message
+2026-04-28T08:16:32.139Z [INFO]: Test log message
