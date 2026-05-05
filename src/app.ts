@@ -1,12 +1,13 @@
 import express from 'express';
 import router from './routes/index';
+import {rateLimiter} from './middleware/rateLimiter';
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
+app.use(rateLimiter);
 app.use('/api/v1', router);
 
 app.use((req, res) => {
@@ -15,5 +16,6 @@ app.use((req, res) => {
     message: 'Route not found'
   });
 });
+
 
 export default app;
