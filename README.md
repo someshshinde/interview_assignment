@@ -360,6 +360,9 @@ src/
 * Role Based Authorization
 * Input Validation
 * Protected Routes
+* Rate Limiter
+* Error Handling
+
 
 ---
 
