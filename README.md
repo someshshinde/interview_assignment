@@ -217,26 +217,72 @@ POST /register
 
 ```text
 POST /task/create
-body:{
-      "title":"test task 1",
-      "description":"test task 1 for assignments",
-      "priority":"LOW",
-      "machine_id":"1",
-      "assigned_to":2
-}
-GET /task?page=1&limit=10
-GET /task?id=1page=1&limit=10
-POST /tasks/workflow/:taskcode/:status/:assignedTo
-POST /tasks/:taskcode/request-materials
-body:{
-    "materialsRequested":"MATERIAL1,MATERIAL2",
-    "reason":"reason for material",
-    "assignedTo":1
-}
-GET /health
 ```
+* Creates a new task. The initial status depends on the user's role.
+* Access: All authenticated users
+* Request Body:
 
----
+| Field         | Type   | Required | Description                                      |
+|---------------|--------|----------|--------------------------------------------------|
+| `title`       | string | Yes      | Task title                                       |
+| `description` | string | Yes      | Detailed description                             |
+| `priority`    | string | No       | LOW, MEDIUM, HIGH (default: MEDIUM)              |
+| `machine_id`  | string | Yes      | Associated machine ID                            |
+| `assigned_to` | number | Yes      | Technician ID (if pre-assigned)                  |
+
+#Flow Logic:
+* USER role: Task status = REPORTED
+* MANAGER/TECHNICIAN role: Task status = IN_PROGRESS
+```text
+GET /task
+```
+* Retrieves tasks with filtering and pagination. Tasks are filtered based on user role:
+
+| Role         | Visible Tasks       |
+|--------------|---------------------|
+| `USER`       | Tasks they reported |
+| `TECHNICIAN` | Tasks they reported |
+| `MANAGER`    | All tasks           |
+
+* Query Parameters:
+
+| Parameter   | Type   |	Default |	Description        |
+|-------------|--------|---------|--------------------|
+| `id`	       | string |	""	     | Filter by task ID  |
+| `page`	     | number | 1	      | Page number        |
+| `limit`	    | number	| 10	     | Items per page     |
+| `status`	   | string	| ""	     | Filter by status   |
+| `priority`	 | string	| ""	     | Filter by priority |
+
+
+```text
+POST /tasks/workflow/:taskcode/:status/:assignedTo
+```
+* Updates task status and assigns technician.
+* Access: MANAGER only
+
+| Parameter    |	Type	  | Description                           |
+|--------------|--------|---------------------------------------|
+| `taskcode`	  | string	| Task code (e.g., TASK-XXXX-XXX)       |
+| `status`	    | string	| New status (see allowed values below) |
+| `assignedTo` |	string	| Technician ID to assign               |
+
+* Allowed Status Values:
+* `PENDING`
+* `APPROVED`
+* `REJECTED`
+* `COMPLETED`
+* `CANCELLED`
+
+```text
+POST /tasks/:taskcode/request-materials
+```
+* Allows technicians to request materials for a task. Changes task status to PENDING for manager approval.
+* Access: TECHNICIAN only
+
+| Parameter  |	Type	 | Description                     |
+|------------|-------|---------------------------------|
+| `taskcode`	|string	| Task code (e.g., TASK-XXXX-XXX) |
 
 # Health Check
 
