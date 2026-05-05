@@ -1,138 +1,145 @@
-import { Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import {
   visibilityMiddleware,
-  AuthRequest,
+  AuthRequest
 } from './visibilityMiddleware';
 
-describe('visibilityMiddleware()', () => {
-  let req: Partial<AuthRequest>;
-  let res: Partial<Response>;
-  let next: NextFunction;
+describe('visibilityMiddleware', () => {
+  let mockReq: Partial<AuthRequest>;
+  let mockRes: Partial<Response>;
+  let mockNext: NextFunction;
 
   beforeEach(() => {
-    req = {
-      query: {},
+    mockReq = {
+      query: {}
     };
 
-    res = {
+    mockRes = {
       status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
+      json: jest.fn()
     };
 
-    next = jest.fn();
-
-    jest.clearAllMocks();
+    mockNext = jest.fn();
   });
 
   it('should return 401 when user is missing', () => {
     visibilityMiddleware(
-      req as AuthRequest,
-      res as Response,
-      next
+      mockReq as AuthRequest,
+      mockRes as Response,
+      mockNext
     );
 
-    expect(res.status).toHaveBeenCalledWith(401);
+    expect(mockRes.status).toHaveBeenCalledWith(401);
 
-    expect(res.json).toHaveBeenCalledWith({
+    expect(mockRes.json).toHaveBeenCalledWith({
       success: false,
-      message: 'Unauthorized',
+      message: 'Unauthorized'
     });
 
-    expect(next).not.toHaveBeenCalled();
+    expect(mockNext).not.toHaveBeenCalled();
   });
 
-  it('should set reported_by for USER role', () => {
-    req.user = {
+  it('should allow USER role', () => {
+    mockReq.user = {
+      id: 1,
+      role: 'USER'
+    };
+
+    visibilityMiddleware(
+      mockReq as AuthRequest,
+      mockRes as Response,
+      mockNext
+    );
+
+    expect(mockNext).toHaveBeenCalled();
+    expect(mockReq.query).toEqual({});
+  });
+
+  it('should set assigned_to for TECHNICIAN', () => {
+    mockReq.user = {
       id: 10,
-      role: 'USER',
+      role: 'TECHNICIAN'
     };
 
     visibilityMiddleware(
-      req as AuthRequest,
-      res as Response,
-      next
+      mockReq as AuthRequest,
+      mockRes as Response,
+      mockNext
     );
 
-    expect(req.query?.reported_by).toBe('10');
-    expect(next).toHaveBeenCalledTimes(1);
+    expect(mockReq.query).toEqual({
+      assigned_to: '10'
+    });
+
+    expect(mockNext).toHaveBeenCalled();
   });
 
-  it('should set assigned_to for TECHNICIAN role', () => {
-    req.user = {
+  it('should set reported_by for MANAGER', () => {
+    mockReq.user = {
       id: 20,
-      role: 'TECHNICIAN',
+      role: 'MANAGER'
     };
 
     visibilityMiddleware(
-      req as AuthRequest,
-      res as Response,
-      next
+      mockReq as AuthRequest,
+      mockRes as Response,
+      mockNext
     );
 
-    expect(req.query?.assigned_to).toBe('20');
-    expect(next).toHaveBeenCalledTimes(1);
-  });
+    expect(mockReq.query).toEqual({
+      reported_by: '20'
+    });
 
-  it('should allow MANAGER without modifying query', () => {
-    req.user = {
-      id: 30,
-      role: 'MANAGER',
-    };
-
-    visibilityMiddleware(
-      req as AuthRequest,
-      res as Response,
-      next
-    );
-
-    expect(req.query).toEqual({});
-    expect(next).toHaveBeenCalledTimes(1);
+    expect(mockNext).toHaveBeenCalled();
   });
 
   it('should return 403 for invalid role', () => {
-    req.user = {
-      id: 99,
-      role: 'ADMIN' as any,
+    mockReq.user = {
+      id: 1,
+      role: 'ADMIN' as any
     };
 
     visibilityMiddleware(
-      req as AuthRequest,
-      res as Response,
-      next
+      mockReq as AuthRequest,
+      mockRes as Response,
+      mockNext
     );
 
-    expect(res.status).toHaveBeenCalledWith(403);
+    expect(mockRes.status).toHaveBeenCalledWith(403);
 
-    expect(res.json).toHaveBeenCalledWith({
+    expect(mockRes.json).toHaveBeenCalledWith({
       success: false,
-      message: 'Forbidden',
+      message: 'Forbidden'
     });
 
-    expect(next).not.toHaveBeenCalled();
+    expect(mockNext).not.toHaveBeenCalled();
   });
 
-  it('should return 500 when unexpected error occurs', () => {
-    req = {
-      user: {
-        id: 1,
-        role: 'USER',
-      },
-      query: undefined as any,
+  it('should return 500 when exception occurs', () => {
+    mockReq.user = {
+      id: 1,
+      role: 'TECHNICIAN'
     };
 
-    visibilityMiddleware(
-      req as AuthRequest,
-      res as Response,
-      next
-    );
-
-    expect(res.status).toHaveBeenCalledWith(500);
-
-    expect(res.json).toHaveBeenCalledWith({
-      success: false,
-      message: 'Visibility middleware failed',
+    Object.defineProperty(mockReq, 'query', {
+      get() {
+        throw new Error('Mock error');
+      }
     });
 
-    expect(next).not.toHaveBeenCalled();
+    visibilityMiddleware(
+      mockReq as AuthRequest,
+      mockRes as Response,
+      mockNext
+    );
+
+    expect(mockRes.status).toHaveBeenCalledWith(500);
+
+    expect(mockRes.json).toHaveBeenCalledWith({
+      success: false,
+      message: 'Visibility middleware failed'
+    });
+
+    expect(mockNext).not.toHaveBeenCalled();
   });
 });

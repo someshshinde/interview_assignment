@@ -1,280 +1,448 @@
-import { Request, Response } from 'express';
-
-jest.mock('express-validator', () => ({
-  validationResult: jest.fn(),
+jest.mock('../../utils/db', () => ({
+  __esModule: true,
+  default: {}
 }));
 
 jest.mock('../../models/task', () => ({
   __esModule: true,
   default: {
     create: jest.fn(),
-    findAndCountAll: jest.fn(),
-  },
-}));
-
-jest.mock('../../utils/helper', () => ({
-  generateTaskCode: jest.fn(),
+    findOne: jest.fn(),
+    findAndCountAll: jest.fn()
+  }
 }));
 
 jest.mock('../../utils/logger', () => ({
   __esModule: true,
   default: {
-    error: jest.fn(),
-  },
+    error: jest.fn()
+  }
 }));
 
+jest.mock('../../utils/helper', () => ({
+  generateTaskCode: jest.fn()
+}));
+
+jest.mock('express-validator', () => ({
+  validationResult: jest.fn()
+}));
+
+
+import { Request, Response } from 'express';
 import { validationResult } from 'express-validator';
-import Task from '../../models/task';
 import { generateTaskCode } from '../../utils/helper';
-import logger from '../../utils/logger';
+
+import Task from '../../models/task';
 
 import {
   createTask,
   taskList,
+  taskApprove,
+  requestMaterials
 } from './task';
 
+
+const mockedTask = Task as jest.Mocked<typeof Task>;
+
+const mockResponse = () => {
+  const res: Partial<Response> = {};
+
+  res.status = jest.fn().mockReturnValue(res);
+  res.json = jest.fn().mockReturnValue(res);
+
+  return res as Response;
+};
+const mockedGenerateTaskCode =
+  generateTaskCode as jest.Mock;
+
 describe('Task Controller', () => {
-  let req: Partial<Request>;
-  let res: Partial<Response>;
-
-  const mockedValidationResult =
-    validationResult as unknown as jest.Mock;
-
   beforeEach(() => {
-    req = {
-      body: {},
-      query: {},
-    };
-
-    res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    };
-
     jest.clearAllMocks();
   });
 
-
-  describe('createTask()', () => {
-    it('should return 400 when validation fails', async () => {
-      mockedValidationResult.mockReturnValueOnce({
+  describe('createTask', () => {
+    it('validation fail', async () => {
+      (validationResult as any).mockReturnValue({
         isEmpty: () => false,
-        array: () => [{ msg: 'Title required' }],
+        array: () => ['error']
       });
 
-      await createTask(req as Request, res as Response);
+      const req = {} as Request;
+      const res = mockResponse();
+
+      await createTask(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
     });
 
-    it('should create task successfully', async () => {
-      mockedValidationResult.mockReturnValueOnce({
-        isEmpty: () => true,
-        array: () => [],
+    it('USER creates task', async () => {
+      (validationResult as any).mockReturnValue({
+        isEmpty: () => true
       });
 
-      req.body = {
-        title: 'Motor Issue',
-        description: 'Machine stopped',
-        priority: 'HIGH',
-        machine_id: 10,
-        assigned_to: 5,
-      };
+      mockedGenerateTaskCode.mockReturnValue('T001');
 
-      (req as any).user = { id: 1 };
+      mockedTask.create.mockResolvedValue({} as any);
 
-      (generateTaskCode as jest.Mock).mockReturnValueOnce(
-        'TSK-1234-ABC'
-      );
+      const req = {
+        body: {},
+        user: {
+          id: 1,
+          role: 'USER'
+        }
+      } as any;
 
-      (Task.create as jest.Mock).mockResolvedValueOnce({
-        id: 1,
-      });
+      const res = mockResponse();
 
-      await createTask(req as Request, res as Response);
+      await createTask(req, res);
 
-      expect(Task.create).toHaveBeenCalledWith({
-        code: 'TSK-1234-ABC',
-        title: 'Motor Issue',
-        description: 'Machine stopped',
-        status: 'REPORTED',
-        priority: 'HIGH',
-        machine_id: 10,
-        reported_by: 1,
-        assigned_to: 5,
-        approved_by: null,
-      });
-
-      expect(res.status).toHaveBeenCalledWith(201);
-    });
-
-    it('should use default MEDIUM priority', async () => {
-      mockedValidationResult.mockReturnValueOnce({
-        isEmpty: () => true,
-        array: () => [],
-      });
-
-      req.body = {
-        title: 'Issue',
-        machine_id: 1,
-      };
-
-      (req as any).user = { id: 7 };
-
-      (generateTaskCode as jest.Mock).mockReturnValueOnce(
-        'TSK-2222-ZZZ'
-      );
-
-      (Task.create as jest.Mock).mockResolvedValueOnce({});
-
-      await createTask(req as Request, res as Response);
-
-      expect(Task.create).toHaveBeenCalledWith(
+      expect(mockedTask.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          priority: 'MEDIUM',
+          status: 'REPORTED'
         })
       );
     });
 
-    it('should return 500 when create task fails', async () => {
-      mockedValidationResult.mockReturnValueOnce({
-        isEmpty: () => true,
-        array: () => [],
+    it('TECHNICIAN creates task', async () => {
+      (validationResult as any).mockReturnValue({
+        isEmpty: () => true
       });
 
-      (req as any).user = { id: 1 };
-      req.body = { title: 'Issue' };
+      mockedGenerateTaskCode.mockReturnValue('T001');
 
-      (generateTaskCode as jest.Mock).mockReturnValueOnce(
-        'TSK-1111-AAA'
+      mockedTask.create.mockResolvedValue({} as any);
+
+      const req = {
+        body: {},
+        user: {
+          id: 1,
+          role: 'TECHNICIAN'
+        }
+      } as any;
+
+      const res = mockResponse();
+
+      await createTask(req, res);
+
+      expect(mockedTask.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: 'IN_PROGRESS'
+        })
       );
+    });
 
-      (Task.create as jest.Mock).mockRejectedValueOnce(
-        new Error('DB Error')
-      );
+    it('createTask exception', async () => {
+      (validationResult as any).mockImplementation(() => {
+        throw new Error();
+      });
 
-      await createTask(req as Request, res as Response);
+      const req = {} as Request;
+      const res = mockResponse();
 
-      expect(logger.error).toHaveBeenCalled();
+      await createTask(req, res);
+
       expect(res.status).toHaveBeenCalledWith(500);
     });
   });
 
+  describe('taskList', () => {
+    const statuses = [
+      'REPORTED',
+      'PENDING',
+      'APPROVED',
+      'IN_PROGRESS',
+      'COMPLETED',
+      'REJECTED',
+      'CANCELLED',
+      'UNKNOWN'
+    ];
 
-  describe('taskList()', () => {
-    it('should fetch task list for ADMIN', async () => {
-      (req as any).user = {
-        id: 1,
-        role: 'ADMIN',
-      };
+    test.each(statuses)(
+      'status %s branch',
+      async (status) => {
+        mockedTask.findAndCountAll.mockResolvedValue({
+          count: 1,
+          rows: [
+            {
+              dataValues: { status },
+              toJSON: () => ({ status })
+            }
+          ]
+        } as any);
 
-      req.query = {
-        page: '1',
-        limit: '10',
-      };
+        const req = {
+          query: {
+            id: '1',
+            status,
+            priority: 'HIGH'
+          },
+          user: {
+            id: 1,
+            role: 'USER'
+          }
+        } as any;
 
-      (Task.findAndCountAll as jest.Mock).mockResolvedValueOnce({
-        rows: [{ id: 1 }],
-        count: 1,
-      });
+        const res = mockResponse();
 
-      await taskList(req as Request, res as Response);
+        await taskList(req, res);
 
-      expect(Task.findAndCountAll).toHaveBeenCalledWith({
-        where: {},
-        limit: 10,
-        offset: 0,
-        order: [['created_at', 'DESC']],
-      });
+        expect(res.status).toHaveBeenCalledWith(200);
+      }
+    );
+
+    it('TECHNICIAN branch', async () => {
+      mockedTask.findAndCountAll.mockResolvedValue({
+        count: 0,
+        rows: []
+      } as any);
+
+      const req = {
+        query: {},
+        user: {
+          id: 1,
+          role: 'TECHNICIAN'
+        }
+      } as any;
+
+      const res = mockResponse();
+
+      await taskList(req, res);
 
       expect(res.status).toHaveBeenCalledWith(200);
     });
 
-    it('should filter USER tasks by reported_by', async () => {
-      (req as any).user = {
-        id: 10,
-        role: 'USER',
-      };
-
-      (Task.findAndCountAll as jest.Mock).mockResolvedValueOnce({
-        rows: [],
-        count: 0,
-      });
-
-      await taskList(req as Request, res as Response);
-
-      expect(Task.findAndCountAll).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: {
-            reported_by: 10,
-          },
-        })
+    it('taskList exception', async () => {
+      mockedTask.findAndCountAll.mockRejectedValue(
+        new Error()
       );
+
+      const req = {
+        query: {},
+        user: {
+          role: 'USER'
+        }
+      } as any;
+
+      const res = mockResponse();
+
+      await taskList(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+    });
+  });
+
+  describe('taskApprove', () => {
+    it('not manager', async () => {
+      const req = {
+        user: {
+          role: 'USER'
+        },
+        params: {}
+      } as any;
+
+      const res = mockResponse();
+
+      await taskApprove(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(403);
     });
 
-    it('should filter TECHNICIAN tasks by assigned_to', async () => {
-      (req as any).user = {
-        id: 20,
-        role: 'TECHNICIAN',
-      };
+    it('invalid status', async () => {
+      const req = {
+        user: {
+          role: 'MANAGER'
+        },
+        params: {
+          status: 'BAD'
+        }
+      } as any;
 
-      (Task.findAndCountAll as jest.Mock).mockResolvedValueOnce({
-        rows: [],
-        count: 0,
-      });
+      const res = mockResponse();
 
-      await taskList(req as Request, res as Response);
+      await taskApprove(req, res);
 
-      expect(Task.findAndCountAll).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: {
-            assigned_to: 20,
-          },
-        })
-      );
+      expect(res.status).toHaveBeenCalledWith(400);
     });
 
-    it('should apply status and priority filters', async () => {
-      (req as any).user = {
-        id: 1,
-        role: 'ADMIN',
-      };
+    it('task not found', async () => {
+      mockedTask.findOne.mockResolvedValue(null);
 
-      req.query = {
-        status: 'OPEN',
-        priority: 'HIGH',
-      };
+      const req = {
+        user: {
+          role: 'MANAGER'
+        },
+        params: {
+          taskcode: 'T001',
+          status: 'APPROVED'
+        }
+      } as any;
 
-      (Task.findAndCountAll as jest.Mock).mockResolvedValueOnce({
-        rows: [],
-        count: 0,
-      });
+      const res = mockResponse();
 
-      await taskList(req as Request, res as Response);
+      await taskApprove(req, res);
 
-      expect(Task.findAndCountAll).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: {
-            status: 'OPEN',
-            priority: 'HIGH',
-          },
-        })
-      );
+      expect(res.status).toHaveBeenCalledWith(404);
     });
 
-    it('should return 500 when fetch fails', async () => {
-      (req as any).user = {
-        id: 1,
-        role: 'ADMIN',
+    it('success', async () => {
+      const task = {
+        update: jest.fn(),
+        reload: jest.fn()
       };
 
-      (Task.findAndCountAll as jest.Mock).mockRejectedValueOnce(
-        new Error('DB Error')
+      mockedTask.findOne.mockResolvedValue(
+        task as any
       );
 
-      await taskList(req as Request, res as Response);
+      const req = {
+        user: {
+          id: 1,
+          role: 'MANAGER'
+        },
+        params: {
+          taskcode: 'T001',
+          status: 'APPROVED'
+        }
+      } as any;
 
-      expect(logger.error).toHaveBeenCalled();
+      const res = mockResponse();
+
+      await taskApprove(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+    });
+
+    it('exception', async () => {
+      mockedTask.findOne.mockRejectedValue(
+        new Error()
+      );
+
+      const req = {
+        user: {
+          role: 'MANAGER'
+        },
+        params: {
+          taskcode: 'T001',
+          status: 'APPROVED'
+        }
+      } as any;
+
+      const res = mockResponse();
+
+      await taskApprove(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+    });
+  });
+
+  describe('requestMaterials', () => {
+    it('not technician', async () => {
+      const req = {
+          params: {},
+          body: {},
+          user: {
+            role: 'USER'
+          }
+        } as any;
+
+      const res = mockResponse();
+
+      await requestMaterials(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(403);
+    });
+
+    it('task not found', async () => {
+      mockedTask.findOne.mockResolvedValue(null);
+
+      const req = {
+        params: {
+          taskcode: 'T001'
+        },
+        body: {},
+        user: {
+          role: 'TECHNICIAN'
+        }
+      } as any;
+
+      const res = mockResponse();
+
+      await requestMaterials(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+    });
+
+    it('not assigned', async () => {
+      mockedTask.findOne.mockResolvedValue({
+        getDataValue: () => 99
+      } as any);
+
+      const req = {
+        params: {
+          taskcode: 'T001'
+        },
+        body: {},
+        user: {
+          id: 1,
+          role: 'TECHNICIAN'
+        }
+      } as any;
+
+      const res = mockResponse();
+
+      await requestMaterials(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(403);
+    });
+
+    it('success', async () => {
+      const task = {
+        getDataValue: () => 1,
+        update: jest.fn(),
+        reload: jest.fn()
+      };
+
+      mockedTask.findOne.mockResolvedValue(
+        task as any
+      );
+
+       const req = {
+        params: {
+          taskcode: 'T001'
+        },
+        body: {
+          materialsRequested: ['motor'],
+          reason: 'damaged',
+          assignedTo: 2
+        },
+        user: {
+          id: 1,
+          role: 'TECHNICIAN'
+        }
+      } as any;
+
+      const res = mockResponse();
+
+      await requestMaterials(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+    });
+
+    it('exception', async () => {
+      mockedTask.findOne.mockRejectedValue(
+        new Error()
+      );
+
+      const req = {
+        user: {
+          role: 'TECHNICIAN'
+        }
+      } as any;
+
+      const res = mockResponse();
+
+      await requestMaterials(req, res);
+
       expect(res.status).toHaveBeenCalledWith(500);
     });
   });

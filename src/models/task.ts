@@ -25,12 +25,24 @@ const task = db.define('tasks', {
     allowNull: false,
     defaultValue: 'REPORTED'
   },
+  materials_requested: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+   material_request_reason:{
+    type: DataTypes.TEXT,
+    allowNull: true
+   },
   priority: {
     type: DataTypes.STRING(20),
     allowNull: false,
     defaultValue: 'MEDIUM'
   },
   machine_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  requested_by: {
     type: DataTypes.INTEGER,
     allowNull: true
   },
@@ -49,7 +61,12 @@ const task = db.define('tasks', {
   created_at: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW
-  }
+  },
+  requested_at: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  
 }, {
   tableName: 'tasks',
   timestamps: false

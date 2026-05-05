@@ -217,8 +217,22 @@ POST /register
 
 ```text
 POST /task/create
+body:{
+      "title":"test task 1",
+      "description":"test task 1 for assignments",
+      "priority":"LOW",
+      "machine_id":"1",
+      "assigned_to":2
+}
 GET /task?page=1&limit=10
 GET /task?id=1page=1&limit=10
+POST /tasks/workflow/:taskcode/:status/:assignedTo
+POST /tasks/:taskcode/request-materials
+body:{
+    "materialsRequested":"MATERIAL1,MATERIAL2",
+    "reason":"reason for material",
+    "assignedTo":1
+}
 GET /health
 ```
 

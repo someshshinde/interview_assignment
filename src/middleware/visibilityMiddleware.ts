@@ -24,7 +24,7 @@ export const visibilityMiddleware = (
 
     switch (role) {
       case 'USER':
-        req.query.reported_by = id.toString();
+        
         break;
 
       case 'TECHNICIAN':
@@ -32,8 +32,8 @@ export const visibilityMiddleware = (
         break;
 
       case 'MANAGER':
-      
-        break;
+       req.query.reported_by = id.toString();
+       break;
 
       default:
         return res.status(403).json({
