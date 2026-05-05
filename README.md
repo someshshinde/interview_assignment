@@ -229,18 +229,24 @@ POST /task/create
 | `priority`    | string | No       | LOW, MEDIUM, HIGH (default: MEDIUM)              |
 | `machine_id`  | string | Yes      | Associated machine ID                            |
 | `assigned_to` | number | Yes      | Technician ID (if pre-assigned)                  |
-
+#Flow Logic:
+* USER role: Task status = REPORTED
+* MANAGER/TECHNICIAN role: Task status = IN_PROGRESS
 ```text
 GET /task?page=1&limit=10
 ```
+```text
 GET /task?id=1page=1&limit=10
+```
+
+```text
 POST /tasks/workflow/:taskcode/:status/:assignedTo
+```
+```text
 POST /tasks/:taskcode/request-materials
-body:{
-    "materialsRequested":"MATERIAL1,MATERIAL2",
-    "reason":"reason for material",
-    "assignedTo":1
-}
+```
+
+```text
 GET /health
 ```
 
