@@ -284,9 +284,6 @@ POST /tasks/:taskcode/request-materials
 |------------|-------|---------------------------------|
 | `taskcode`	|string	| Task code (e.g., TASK-XXXX-XXX) |
 
-```text
-GET /health
-```
 # Health Check
 
 ```text
