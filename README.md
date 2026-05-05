@@ -233,8 +233,25 @@ POST /task/create
 * USER role: Task status = REPORTED
 * MANAGER/TECHNICIAN role: Task status = IN_PROGRESS
 ```text
-GET /task?page=1&limit=10
+GET /task
 ```
+* Retrieves tasks with filtering and pagination. Tasks are filtered based on user role:
+| Role         | Visible Tasks       |
+|--------------|---------------------|
+| `USER`       | Tasks they reported |
+| `TECHNICIAN` | Tasks they reported |
+| `MANAGER`    | All tasks           |
+
+# Query Parameters:
+
+| Parameter   | Type   |	Default |	Description        |
+|-------------|--------|---------|--------------------|
+| `id`	       | string |	""	     | Filter by task ID  |
+| `page`	     | number | 1	      | Page number        |
+| `limit`	    | number	| 10	     | Items per page     |
+| `status`	   | string	| ""	     | Filter by status   |
+| priority`	  | string	| ""	     | Filter by priority |
+
 ```text
 GET /task?id=1page=1&limit=10
 ```
