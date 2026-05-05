@@ -372,6 +372,8 @@ This architecture follows enterprise backend best practices:
 * Easy maintenance
 * Scalable APIs
 * Secure authentication
+* Rate limiter
+* RBAC
 
 ---
 
