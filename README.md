@@ -218,9 +218,9 @@ POST /register
 ```text
 POST /task/create
 ```
-# Creates a new task. The initial status depends on the user's role.
-# Access: All authenticated users
-# Request Body:
+* Creates a new task. The initial status depends on the user's role.
+* Access: All authenticated users
+* Request Body:
 
 | Field         | Type   | Required | Description                                      |
 |---------------|--------|----------|--------------------------------------------------|
