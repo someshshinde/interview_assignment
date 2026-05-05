@@ -8,6 +8,7 @@
   "scripts": {
     "start": "node -r ts-node/register --env-file=.env src/server.ts",
     "dev": "node -r ts-node/register --env-file=.env src/server.ts",
+    "build": "tsc",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
