@@ -218,10 +218,9 @@ POST /register
 ```text
 POST /task/create
 ```
-Creates a new task. The initial status depends on the user's role.
-Access: All authenticated users
-Request Body:
-## Task Fields
+# Creates a new task. The initial status depends on the user's role.
+# Access: All authenticated users
+# Request Body:
 
 | Field         | Type   | Required | Description                                      |
 |---------------|--------|----------|--------------------------------------------------|
@@ -229,9 +228,11 @@ Request Body:
 | `description` | string | Yes      | Detailed description                             |
 | `priority`    | string | No       | LOW, MEDIUM, HIGH (default: MEDIUM)              |
 | `machine_id`  | string | Yes      | Associated machine ID                            |
-| `assigned_to` | string | No       | Technician ID (if pre-assigned)                  |
+| `assigned_to` | number | Yes      | Technician ID (if pre-assigned)                  |
 
+```text
 GET /task?page=1&limit=10
+```
 GET /task?id=1page=1&limit=10
 POST /tasks/workflow/:taskcode/:status/:assignedTo
 POST /tasks/:taskcode/request-materials
