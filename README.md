@@ -263,7 +263,7 @@ POST /tasks/workflow/:taskcode/:status/:assignedTo
 
 | Parameter    |	Type	  | Description                           |
 |--------------|--------|---------------------------------------|
-|`taskcode`	   | string	| Task code (e.g., TASK-XXXXXX)         |
+| `taskcode`	  | string	| Task code (e.g., TASK-XXXX-XXX)       |
 | `status`	    | string	| New status (see allowed values below) |
 | `assignedTo` |	string	| Technician ID to assign               |
 
@@ -280,9 +280,9 @@ POST /tasks/:taskcode/request-materials
 * Allows technicians to request materials for a task. Changes task status to PENDING for manager approval.
 * Access: TECHNICIAN only
 
-| Parameter  |	Type	 | Description                    |
-|------------|-------|--------------------------------|
-| `taskcode`	|string	| Task code (e.g., TASK-XXXXXX)  |
+| Parameter  |	Type	 | Description                     |
+|------------|-------|---------------------------------|
+| `taskcode`	|string	| Task code (e.g., TASK-XXXX-XXX) |
 
 ```text
 GET /health
