@@ -246,13 +246,13 @@ GET /task
 
 * Query Parameters:
 
-| Parameter   | Type   |	Default |	Description        |
+| Parameter   | Type   | Default |	Description       |
 |-------------|--------|---------|--------------------|
-| `id`	       | string |	""	     | Filter by task ID  |
-| `page`	     | number | 1	      | Page number        |
-| `limit`	    | number	| 10	     | Items per page     |
-| `status`	   | string	| ""	     | Filter by status   |
-| `priority`	 | string	| ""	     | Filter by priority |
+| `id`	  | string | ""	   | Filter by task ID  |
+| `page`	  | number | 1	   | Page number        |
+| `limit`	  | number | 10	   | Items per page     |
+| `status`	  | string | ""	   | Filter by status   |
+| `priority`  | string | ""	   | Filter by priority |
 
 
 ```text
@@ -261,11 +261,11 @@ POST /tasks/workflow/:taskcode/:status/:assignedTo
 * Updates task status and assigns technician.
 * Access: MANAGER only
 
-| Parameter    |	Type	  | Description                           |
+| Parameter    |	Type	| Description                           |
 |--------------|--------|---------------------------------------|
-| `taskcode`	  | string	| Task code (e.g., TASK-XXXX-XXX)       |
-| `status`	    | string	| New status (see allowed values below) |
-| `assignedTo` |	string	| Technician ID to assign               |
+| `taskcode`   | string	| Task code (e.g., TASK-XXXX-XXX)       |
+| `status`	   | string	| New status (see allowed values below) |
+| `assignedTo` | string	| Technician ID to assign               |
 
 * Allowed Status Values:
 * `PENDING`
@@ -280,9 +280,13 @@ POST /tasks/:taskcode/request-materials
 * Allows technicians to request materials for a task. Changes task status to PENDING for manager approval.
 * Access: TECHNICIAN only
 
-| Parameter  |	Type	 | Description                     |
-|------------|-------|---------------------------------|
-| `taskcode`	|string	| Task code (e.g., TASK-XXXX-XXX) |
+| Parameter            | Type   | Description                       |
+|----------------------|--------|-----------------------------------|
+| `taskcode`           | string | Task code (e.g., TASK-XXXX-XXX)   |
+| `materialsRequested` | text   | Comma-separated list of materials |
+| `reason`             | text   | Reason for requesting materials   |
+| `assignedTo`         | number | Technician ID to assign           |
+
 
 # Health Check
 
